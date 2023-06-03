@@ -1,0 +1,130 @@
+<html>
+    <head>
+        <title>My Todo App</title>
+        <h2>My ToDo App</h2>
+    </head>
+    <body>
+        <input id="todo_title" type="text"/>
+        <input id="due_date" type="date">
+        <button onclick="addToDo();">Add Task</button>
+        <p></p>
+        
+        <div id="todo_list"></div>
+        <script>
+
+            //MODEL
+
+            let todos;
+
+            //retrieve localstorage
+            const savedToDos = JSON.parse(localStorage.getItem('todos'));
+
+            //use localstorage if it already contains an array
+            if (Array.isArray(savedToDos)){
+                todos = savedToDos;
+            }
+            else{
+                todos = [{
+                title: 'Finish homework',
+                due_date: '13-06-2023',
+                id: '1'
+            }, {
+                title: 'Move furniture',
+                due_date: '15-06-2023',
+                id: '2'
+            }, {
+                title: 'Tidy bedroom',
+                due_date: '06-06-2023',
+                id: '3'
+            }];
+            }
+
+            //create new ToDo task
+            function createToDo(title, due_date) {
+                const id = new Date().getTime().toString();    //unique id
+
+                todos.push({
+                    title: title,
+                    due_date: due_date,
+                    id: id
+                });
+
+                saveToDos();
+            }
+
+            //remove ToDo task from array
+            function removeToDo(idToDelete) {
+
+                //return array not containing the deleted task
+                todos = todos.filter(todo => {
+                    if (todo.id === idToDelete){
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                saveToDos();
+            }
+
+            //save ToDo task
+            function saveToDos() {
+                //localstorage is browser storage
+                localStorage.setItem('todos', JSON.stringify(todos));
+            }
+
+
+            //VIEW
+
+            //reset the list (render page)
+            let render = () => {
+                document.getElementById('todo_list').innerHTML = ''; // clear the list part of the page
+
+                todos.forEach(todo => {
+                    let element = document.createElement('div');
+                    element.innerText = todo.title + ' ' + todo.due_date;
+
+                    let todoList = document.getElementById('todo_list');
+                    todoList.appendChild(element); //add div to page
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerText = 'Delete';
+                    deleteButton.style = 'margin-left: 12px'; //to keep space between list and button
+                    deleteButton.onclick = deleteTodo;
+                    deleteButton.id = todo.id;
+                    element.appendChild(deleteButton); 
+                });
+            }
+            
+            
+            //CONTROLLER
+
+            //add new ToDo task
+            let addToDo = () => {
+            const textbox = document.getElementById('todo_title');  
+            const dateBox = document.getElementById('due_date');
+
+            const title = textbox.value;
+            const due_date = dateBox.value;
+
+            createToDo(title, due_date);
+
+            render();
+            }
+
+            //delete ToDo task
+            let deleteTodo = (event) => { //event parameter is automatically passed!
+                const deleteButton = event.target;
+                const idToDelete = deleteButton.id;
+
+                removeToDo(idToDelete);
+
+                render();
+            }
+            
+
+            render();
+
+        </script>
+    </body>
+</html>
